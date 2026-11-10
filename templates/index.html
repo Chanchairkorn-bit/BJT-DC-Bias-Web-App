@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BJT DC Bias Calculator · ENG29 2121 Lab 02</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">ENG29 2121 · Lab 02</p>
+      <h1>BJT Common-Emitter DC Bias</h1>
+      <p class="subtitle">Voltage-Divider Bias · Forward-Active Approximation</p>
+    </header>
+
+    <section class="card">
+      <h2>Input Parameters</h2>
+      <form method="post" action="{{ url_for('index') }}">
+        <div class="grid">
+          <label>VCC (V)
+            <input type="number" step="any" name="vcc" value="{{ form.vcc }}" required>
+          </label>
+          <label>R1 (kΩ)
+            <input type="number" step="any" name="r1" value="{{ form.r1 }}" required>
+          </label>
+          <label>R2 (kΩ)
+            <input type="number" step="any" name="r2" value="{{ form.r2 }}" required>
+          </label>
+          <label>RC (kΩ)
+            <input type="number" step="any" name="rc" value="{{ form.rc }}" required>
+          </label>
+          <label>RE (kΩ)
+            <input type="number" step="any" name="re" value="{{ form.re }}" required>
+          </label>
+          <label>β (beta)
+            <input type="number" step="any" name="beta" value="{{ form.beta }}" required>
+          </label>
+          <label>VBE (V)
+            <input type="number" step="any" name="vbe" value="{{ form.vbe }}" required>
+          </label>
+        </div>
+        <button type="submit">Calculate DC Bias</button>
+      </form>
+
+      {% if errors %}
+      <div class="alert alert-error">
+        <strong>ไม่สามารถคำนวณได้</strong>
+        <ul>
+          {% for error in errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </section>
+
+    {% if result %}
+    <section class="card">
+      <h2>DC Bias Results</h2>
+
+      <p class="region region-{{ result.region }}">
+        Operating region:
+        {% if result.region == 'forward-active' %}
+          Forward-Active (ใช้งานได้)
+        {% elif result.region == 'saturation' %}
+          Saturation (อิ่มตัว)
+        {% elif result.region == 'cutoff' %}
+          Cutoff (ตัดขาด)
+        {% else %}
+          {{ result.region }}
+        {% endif %}
+      </p>
+
+      <table class="results">
+        <thead>
+          <tr><th>Quantity</th><th>Value</th><th>Unit</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>VB</td><td>{{ display.vb }}</td><td>V</td></tr>
+          <tr><td>VE</td><td>{{ display.ve }}</td><td>V</td></tr>
+          <tr><td>VC</td><td>{{ display.vc }}</td><td>V</td></tr>
+          <tr><td>VCE</td><td>{{ display.vce }}</td><td>V</td></tr>
+          <tr><td>IC</td><td>{{ display.ic_ma }}</td><td>mA</td></tr>
+          <tr><td>IE</td><td>{{ display.ie_ma }}</td><td>mA</td></tr>
+          <tr><td>IB</td><td>{{ display.ib_ua }}</td><td>µA</td></tr>
+          <tr class="secondary"><td>VTH (Thevenin base)</td><td>{{ display.vth }}</td><td>V</td></tr>
+          <tr class="secondary"><td>RTH (Thevenin base)</td><td>{{ display.rth_kohm }}</td><td>kΩ</td></tr>
+        </tbody>
+      </table>
+
+      {% if result.warnings %}
+      <div class="alert alert-warning">
+        <strong>คำเตือน: ผลลัพธ์นอกขอบเขตของแบบจำลอง</strong>
+        <ul>
+          {% for warning in result.warnings %}
+          <li>{{ warning }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    <footer class="foot">
+      <p>แบบจำลอง Forward-Active: β คงที่ และ VBE คงที่ · ไม่ใช่ ngspice/SPICE solver</p>
+    </footer>
+  </main>
+</body>
+</html>
