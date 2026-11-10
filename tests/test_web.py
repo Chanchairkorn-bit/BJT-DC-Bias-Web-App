@@ -24,6 +24,7 @@ class TestWebApp(unittest.TestCase):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Calculate DC Bias", response.data)
+        self.assertIn(b"Circuit: Common-Emitter Amplifier", response.data)
         for field in (b'name="vcc"', b'name="r1"', b'name="beta"'):
             self.assertIn(field, response.data)
 

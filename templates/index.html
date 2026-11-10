@@ -15,6 +15,89 @@
     </header>
 
     <section class="card">
+      <h2>Circuit: Common-Emitter Amplifier</h2>
+      <figure class="schematic">
+        <svg viewBox="0 0 460 400" role="img" aria-labelledby="sch-title sch-desc" xmlns="http://www.w3.org/2000/svg">
+          <title id="sch-title">Common-emitter amplifier with voltage-divider bias</title>
+          <desc id="sch-desc">VCC feeds R1 and RC. R1 and R2 form a voltage divider that biases the base of NPN transistor Q1. RC connects to the collector and RE connects the emitter to ground.</desc>
+
+          <!-- transistor body -->
+          <circle cx="307" cy="210" r="32" fill="#dceefb" stroke="#1d638b" stroke-width="2.4" />
+
+          <!-- wires and components -->
+          <g fill="none" stroke="#1d638b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <!-- top rail -->
+            <path d="M120 64 H320" />
+            <path d="M120 64 V90" />
+            <path d="M320 64 V90" />
+
+            <!-- R1 -->
+            <polyline points="120,90 110,96 130,104 110,112 130,120 110,128 130,136 120,142" />
+            <path d="M120 142 V210" />
+            <!-- R2 -->
+            <path d="M120 210 V250" />
+            <polyline points="120,250 110,256 130,264 110,272 130,280 110,288 130,296 120,302" />
+            <path d="M120 302 V345" />
+            <!-- left ground -->
+            <path d="M105 345 H135" />
+            <path d="M111 351 H129" />
+            <path d="M116 357 H124" />
+
+            <!-- base wire -->
+            <path d="M120 210 H300" />
+
+            <!-- RC -->
+            <polyline points="320,90 310,96 330,104 310,112 330,120 310,128 330,136 320,142" />
+            <path d="M320 142 V188" />
+
+            <!-- RE -->
+            <path d="M320 232 V280" />
+            <polyline points="320,280 310,286 330,294 310,302 330,310 310,318 330,326 320,332" />
+            <path d="M320 332 V365" />
+            <!-- right ground -->
+            <path d="M305 365 H335" />
+            <path d="M311 371 H329" />
+            <path d="M316 377 H324" />
+
+            <!-- transistor leads and base bar -->
+            <path d="M300 202 L320 188" />
+            <path d="M300 218 L320 232" />
+            <path d="M300 196 V224" stroke-width="3.4" />
+          </g>
+
+          <!-- NPN emitter arrow -->
+          <polygon points="320,232 309.5,229.6 314.1,223.0" fill="#1d638b" />
+
+          <!-- junction dots -->
+          <circle cx="320" cy="64" r="4.5" fill="#103658" />
+          <circle cx="120" cy="210" r="4.5" fill="#103658" />
+
+          <!-- labels -->
+          <g font-family="Tahoma, 'Noto Sans Thai', sans-serif">
+            <text x="336" y="60" font-size="15" font-weight="700" fill="#103658">VCC = {{ form.vcc }} V</text>
+
+            <text x="98" y="112" text-anchor="end" font-size="14" font-weight="700" fill="#17344b">R1</text>
+            <text x="98" y="131" text-anchor="end" font-size="13" fill="#546d83">{{ form.r1 }} kΩ</text>
+
+            <text x="98" y="272" text-anchor="end" font-size="14" font-weight="700" fill="#17344b">R2</text>
+            <text x="98" y="291" text-anchor="end" font-size="13" fill="#546d83">{{ form.r2 }} kΩ</text>
+
+            <text x="348" y="112" font-size="14" font-weight="700" fill="#17344b">RC</text>
+            <text x="348" y="131" font-size="13" fill="#546d83">{{ form.rc }} kΩ</text>
+
+            <text x="348" y="312" font-size="14" font-weight="700" fill="#17344b">RE</text>
+            <text x="348" y="331" font-size="13" fill="#546d83">{{ form.re }} kΩ</text>
+
+            <text x="352" y="200" font-size="14" font-weight="700" fill="#17344b">Q1</text>
+            <text x="352" y="218" font-size="13" fill="#546d83">NPN</text>
+            <text x="352" y="236" font-size="13" fill="#546d83">(β = {{ form.beta }})</text>
+          </g>
+        </svg>
+        <figcaption>Voltage-divider bias · ค่าบนแผนภาพอัปเดตตามช่องกรอก</figcaption>
+      </figure>
+    </section>
+
+    <section class="card">
       <h2>Input Parameters</h2>
       <form method="post" action="{{ url_for('index') }}">
         <div class="grid">
