@@ -43,15 +43,7 @@
 
           <div class="unit-bar">
             <label class="unit-pick">
-              <span>ตัวต้านทาน</span>
-              <select name="unit_r">
-                {% for key, u in resistance_units.items() %}
-                <option value="{{ key }}"{% if key == unit_r %} selected{% endif %}>{{ u.symbol }}</option>
-                {% endfor %}
-              </select>
-            </label>
-            <label class="unit-pick">
-              <span>กระแส</span>
+              <span>กระแส (ผลลัพธ์)</span>
               <select name="unit_i">
                 {% for key, u in current_units.items() %}
                 <option value="{{ key }}"{% if key == unit_i %} selected{% endif %}>{{ u.symbol }}</option>
@@ -59,7 +51,7 @@
               </select>
             </label>
             <label class="unit-pick">
-              <span>แรงดัน</span>
+              <span>แรงดัน (ผลลัพธ์)</span>
               <select name="unit_v">
                 {% for key, u in voltage_units.items() %}
                 <option value="{{ key }}"{% if key == unit_v %} selected{% endif %}>{{ u.symbol }}</option>
@@ -68,11 +60,26 @@
             </label>
           </div>
 
+          <p class="unit-hint">
+            หน่วยตัวต้านทานเลือกได้ทีละตัวที่ช่องกรอก (Ω · kΩ · MΩ)
+          </p>
+
           <div class="grid">
             {% for field in form_fields %}
             <label class="field{% if loop.last and (form_fields|length) is odd %} field-wide{% endif %}">
-              <span class="field-label">{{ field.label }} <em>{{ field.unit }}</em></span>
+              <span class="field-label">{{ field.label }}{% if not field.unit_name %} <em>{{ field.unit }}</em>{% endif %}</span>
+              {% if field.unit_name %}
+              <span class="input-unit">
+                <input type="number" step="any" name="{{ field.name }}" value="{{ form[field.name] }}" required>
+                <select name="{{ field.unit_name }}" aria-label="หน่วยของ {{ field.label }}">
+                  {% for key, u in resistance_units.items() %}
+                  <option value="{{ key }}"{% if key == field.unit_key %} selected{% endif %}>{{ u.symbol }}</option>
+                  {% endfor %}
+                </select>
+              </span>
+              {% else %}
               <input type="number" step="any" name="{{ field.name }}" value="{{ form[field.name] }}" required>
+              {% endif %}
             </label>
             {% endfor %}
           </div>

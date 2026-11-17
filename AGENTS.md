@@ -11,7 +11,8 @@ point for ENG29 2121 Lab 02.
   HTML or any web framework.
 - Keep HTTP/form handling in `app.py`. The template must not contain
   physics equations.
-- Internal units are SI (V, Ω, A). Convert kΩ → Ω at the web layer.
+- Internal units are SI (V, Ω, A). Convert each resistor's selected
+  unit (Ω / kΩ / MΩ) to Ω at the web layer.
 - Every new behavior needs a test under `tests/`.
 - Invalid input must produce a readable message, never a 500 error.
 - Out-of-region results must carry a warning; do not claim accuracy

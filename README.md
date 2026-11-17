@@ -15,8 +15,9 @@ Repository: https://github.com/Chanchairkorn-bit/BJT-DC-Bias-Web-App
 ## What it does
 
 - Tabs select the bias topology; the form and schematic change to match.
-- **Selectable units** on every topology: resistance input in Ω / kΩ / MΩ,
-  output voltage in V / mV / µV, output current in A / mA / µA.
+- **Selectable units** on every topology: each resistor input (R1, R2, RC,
+  RE, RB) has its own Ω / kΩ / MΩ selector, while output voltage is shown
+  in V / mV / µV and output current in A / mA / µA.
 - The Python backend (`dc_bias.py`) computes the DC operating point.
 - Results are rendered in the browser with the selected units.
 - Invalid inputs (`R ≤ 0`, `β ≤ 0`, `VCC ≤ 0`, non-numeric) show a clear
@@ -26,19 +27,22 @@ Repository: https://github.com/Chanchairkorn-bit/BJT-DC-Bias-Web-App
 
 ## Unit selection
 
-A unit bar above the input fields sets the units for the whole page. The
-choices are kept when you switch bias tabs or recalculate.
+**Each resistor has its own unit selector** next to its input, so one
+branch can be entered in kΩ while another is in Ω or MΩ. The schematic
+labels update to match the unit of each individual resistor.
+
+Output units are chosen in the bar above the inputs:
 
 | Quantity | Options | Default |
 |----------|---------|---------|
-| Resistance (R1, R2, RC, RE, RB) | Ω, kΩ, MΩ | kΩ |
+| Each resistor (R1, R2, RC, RE, RB) | Ω, kΩ, MΩ | kΩ |
 | Voltage (VB, VE, VC, VCE, VTH) | V, mV, µV | V |
 | Current (IC, IE, IB) | A, mA, µA | mA |
 
 Internally everything is still computed in SI units (V, Ω, A); the
-selection only changes what you type and what is displayed. For example,
-`R1 = 100 kΩ`, `R1 = 100000 Ω` and `R1 = 0.1 MΩ` all describe the same
-circuit.
+selectors only change what you type and what is displayed. For example,
+`R2 = 22 kΩ`, `R2 = 22000 Ω` and `R2 = 0.022 MΩ` all describe the same
+circuit, and `RTH`/`RB` are reported in the unit chosen for `R1`/`RB`.
 
 ## Project structure
 

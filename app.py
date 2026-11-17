@@ -1,8 +1,8 @@
 """Flask web application for the BJT DC Bias lab (ENG29 2121 Lab 02).
 
 Supports three bias topologies: voltage divider, fixed bias and emitter
-bias, with selectable input resistance units and output voltage/current
-units.
+bias. Every resistor input has its own unit selector (ohm, kOhm, MOhm),
+and the output voltage/current units are selectable as well.
 
 The web layer only parses/validates the HTTP form, converts units, calls
 the engineering module and renders the result. All circuit physics lives
@@ -75,7 +75,7 @@ BIAS_TYPES = {
 
 DEFAULT_BIAS = "voltage-divider"
 
-# Fields entered as resistance; their input unit is selectable.
+# Fields entered as resistance; each one has its own unit selector.
 RESISTOR_FIELDS = {"r1", "r2", "rc", "re", "rb"}
 
 RESISTANCE_UNITS = {
@@ -105,6 +105,11 @@ def _resolve_unit(table, key, default):
     return key if key in table else default
 
 
+def _unit_field_name(name: str) -> str:
+    """Form control name of the unit selector for resistor ``name``."""
+    return f"unit_{name}"
+
+
 def _field_labels(spec) -> dict:
     return {name: f"{label} ({unit})" for name, label, unit in spec["fields"]}
 
@@ -119,8 +124,12 @@ def _to_float(name: str, label: str, raw: str) -> float:
         raise ValueError(f"ค่า {label} ต้องเป็นตัวเลข")
 
 
-def parse_form(bias_key: str, form, resistance_factor: float, labels=None) -> dict:
-    """Convert raw form strings into SI-unit keyword arguments."""
+def parse_form(bias_key: str, form, resistance_factors, labels=None) -> dict:
+    """Convert raw form strings into SI-unit keyword arguments.
+
+    ``resistance_factors`` maps each resistor field name (``r1``, ``rc`` …)
+    to the factor of the unit selected for that individual field.
+    """
     spec = BIAS_TYPES[bias_key]
     if labels is None:
         labels = _field_labels(spec)
@@ -128,7 +137,7 @@ def parse_form(bias_key: str, form, resistance_factor: float, labels=None) -> di
     for name, _label, _unit in spec["fields"]:
         value = _to_float(name, labels[name], form.get(name))
         if name in RESISTOR_FIELDS:
-            value *= resistance_factor  # selected resistance unit -> Ohm
+            value *= resistance_factors[name]  # that field's unit -> Ohm
         values[name] = value
     return values
 
@@ -137,9 +146,8 @@ def _fmt(value, unit):
     return f"{value:.{unit['decimals']}f}"
 
 
-def _display(result, unit_r, unit_i, unit_v) -> dict:
+def _display(result, unit_i, unit_v, rth_unit=DEFAULT_UNIT_R, rb_unit=DEFAULT_UNIT_R) -> dict:
     """Pre-format numbers in the selected output units."""
-    ru = RESISTANCE_UNITS[unit_r]
     iu = CURRENT_UNITS[unit_i]
     vu = VOLTAGE_UNITS[unit_v]
 
@@ -155,10 +163,12 @@ def _display(result, unit_r, unit_i, unit_v) -> dict:
         "ib": _fmt(result.ib * iu["factor"], iu),
     }
     if result.vth is not None:
+        ru = RESISTANCE_UNITS[rth_unit]
         display["vth"] = _fmt(result.vth * vu["factor"], vu)
         display["rth"] = _fmt(result.rth / ru["factor"], ru)
         display["runit"] = ru["symbol"]
     if result.rb is not None:
+        ru = RESISTANCE_UNITS[rb_unit]
         display["rb"] = _fmt(result.rb / ru["factor"], ru)
         display["runit"] = ru["symbol"]
     return display
@@ -175,39 +185,79 @@ def index():
         bias_key = DEFAULT_BIAS
     spec = BIAS_TYPES[bias_key]
 
-    unit_r = _resolve_unit(RESISTANCE_UNITS, request.values.get("unit_r"), DEFAULT_UNIT_R)
     unit_i = _resolve_unit(CURRENT_UNITS, request.values.get("unit_i"), DEFAULT_UNIT_I)
     unit_v = _resolve_unit(VOLTAGE_UNITS, request.values.get("unit_v"), DEFAULT_UNIT_V)
-    resistance_factor = RESISTANCE_UNITS[unit_r]["factor"]
+    # ``unit_r`` is only a fallback default; each resistor may override it
+    # with its own ``unit_<field>`` selector.
+    default_unit_r = _resolve_unit(
+        RESISTANCE_UNITS, request.values.get("unit_r"), DEFAULT_UNIT_R
+    )
 
     form = dict(spec["defaults"])
     result = None
     display = None
     errors = []
 
-    # Resolve the unit label for each input field.
+    # Resolve the unit of every input field.
     form_fields = []
+    resistor_units = {}
     for name, label, unit in spec["fields"]:
         if name in RESISTOR_FIELDS:
-            shown_unit = RESISTANCE_UNITS[unit_r]["symbol"]
+            unit_key = _unit_field_name(name)
+            chosen = _resolve_unit(
+                RESISTANCE_UNITS, request.values.get(unit_key), default_unit_r
+            )
+            resistor_units[name] = chosen
+            form_fields.append(
+                {
+                    "name": name,
+                    "label": label,
+                    "unit": RESISTANCE_UNITS[chosen]["symbol"],
+                    "unit_name": unit_key,
+                    "unit_key": chosen,
+                }
+            )
         else:
-            shown_unit = unit
-        form_fields.append({"name": name, "label": label, "unit": shown_unit})
+            form_fields.append(
+                {
+                    "name": name,
+                    "label": label,
+                    "unit": unit,
+                    "unit_name": None,
+                    "unit_key": None,
+                }
+            )
 
     labels = {
         field["name"]: f"{field['label']} ({field['unit']})"
         for field in form_fields
     }
+    resistance_factors = {
+        name: RESISTANCE_UNITS[key]["factor"]
+        for name, key in resistor_units.items()
+    }
 
     if request.method == "POST":
         form = {name: request.form.get(name, "") for name, _l, _u in spec["fields"]}
         try:
-            values = parse_form(bias_key, request.form, resistance_factor, labels)
+            values = parse_form(bias_key, request.form, resistance_factors, labels)
             result = calculate_by_type(bias_key, **values)
         except ValueError as exc:
             errors.append(str(exc))
         else:
-            display = _display(result, unit_r, unit_i, unit_v)
+            display = _display(
+                result,
+                unit_i,
+                unit_v,
+                rth_unit=resistor_units.get("r1", default_unit_r),
+                rb_unit=resistor_units.get("rb", default_unit_r),
+            )
+
+    # Schematic labels follow the unit chosen for each individual resistor.
+    unit_r_symbols = {
+        f"unit_{name}_symbol": RESISTANCE_UNITS[key]["symbol"]
+        for name, key in resistor_units.items()
+    }
 
     return render_template(
         "index.html",
@@ -220,13 +270,12 @@ def index():
         bias_key=bias_key,
         spec=spec,
         schematic=spec["schematic"],
-        unit_r=unit_r,
         unit_i=unit_i,
         unit_v=unit_v,
-        unit_r_symbol=RESISTANCE_UNITS[unit_r]["symbol"],
-        resistance_units=RESISTANCE_UNITS,
         current_units=CURRENT_UNITS,
         voltage_units=VOLTAGE_UNITS,
+        resistance_units=RESISTANCE_UNITS,
+        **unit_r_symbols,
     )
 
 

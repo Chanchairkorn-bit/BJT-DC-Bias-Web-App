@@ -210,7 +210,7 @@ body {
 /* ---------- Form ---------- */
 .unit-bar {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   padding: 12px;
   margin-bottom: 16px;
@@ -250,6 +250,47 @@ body {
 .unit-pick select:hover { border-color: #c3d6e6; }
 
 .unit-pick select:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(12, 128, 120, .16);
+}
+
+.unit-hint {
+  margin: -6px 0 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.input-unit {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+
+.input-unit input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+.input-unit select {
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  width: auto;
+  padding: 8px 6px;
+  color: var(--navy);
+  background: #eef6fb;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.input-unit select:hover { border-color: #c3d6e6; }
+
+.input-unit select:focus {
   outline: none;
   border-color: var(--teal);
   box-shadow: 0 0 0 3px rgba(12, 128, 120, .16);

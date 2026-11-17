@@ -78,8 +78,18 @@ class TestWebApp(unittest.TestCase):
     def test_get_index_shows_unit_selectors(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
-        for name in (b'name="unit_r"', b'name="unit_i"', b'name="unit_v"'):
+        for name in (b'name="unit_i"', b'name="unit_v"'):
             self.assertIn(name, response.data)
+        for name in (b'name="unit_r1"', b'name="unit_r2"',
+                     b'name="unit_rc"', b'name="unit_re"'):
+            self.assertIn(name, response.data)
+
+    def test_get_fixed_bias_has_unit_per_resistor(self):
+        response = self.client.get("/?bias=fixed")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'name="unit_rb"', response.data)
+        self.assertIn(b'name="unit_rc"', response.data)
+        self.assertNotIn(b'name="unit_re"', response.data)
 
     def test_get_fixed_bias_shows_rb(self):
         response = self.client.get("/?bias=fixed")
@@ -179,6 +189,60 @@ class TestWebApp(unittest.TestCase):
         self.assertIn(b'<option value="ohm" selected>', response.data)
         self.assertIn(b'<option value="ua" selected>', response.data)
         self.assertIn(b'<option value="mv" selected>', response.data)
+
+    # ---------- POST: one unit per resistor ----------
+    def test_each_resistor_uses_its_own_unit(self):
+        data = {
+            "bias_type": "voltage-divider",
+            "vcc": "12",
+            "unit_r1": "kohm", "r1": "100",
+            "unit_r2": "ohm", "r2": "22000",
+            "unit_rc": "mohm", "rc": "0.0022",
+            "unit_re": "ohm", "re": "1000",
+            "beta": "100",
+            "vbe": "0.70",
+        }
+        response = self.client.post("/", data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"1.942", response.data)  # VB
+        self.assertIn(b"8.052", response.data)  # VCE
+        self.assertIn(b"1.230", response.data)  # IC mA
+        self.assertIn(b"18.033", response.data)  # RTH in R1's unit (kOhm)
+
+    def test_per_field_unit_overrides_global_default(self):
+        # unit_r=ohm sets the fallback, but R1 explicitly asks for kOhm.
+        data = {
+            "bias_type": "voltage-divider",
+            "vcc": "12",
+            "unit_r": "ohm",
+            "unit_r1": "kohm", "r1": "100",
+            "unit_r2": "kohm", "r2": "22",
+            "unit_rc": "kohm", "rc": "2.2",
+            "unit_re": "kohm", "re": "1",
+            "beta": "100",
+            "vbe": "0.70",
+        }
+        response = self.client.post("/", data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"1.942", response.data)
+        self.assertIn(b"8.052", response.data)
+
+    def test_mixed_units_selected_in_form(self):
+        data = {
+            "bias_type": "fixed",
+            "vcc": "12",
+            "unit_rb": "mohm", "rb": "0.47",
+            "unit_rc": "ohm", "rc": "2200",
+            "beta": "100",
+            "vbe": "0.70",
+        }
+        response = self.client.post("/", data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"6.711", response.data)      # VC
+        self.assertIn(b"0.470000", response.data)   # RB shown in its own unit
+        # Schematic labels follow each resistor's own unit.
+        self.assertIn("0.47 MΩ".encode("utf-8"), response.data)
+        self.assertIn("2200 Ω".encode("utf-8"), response.data)
 
     # ---------- POST: validation ----------
     def test_post_non_numeric_shows_error(self):
