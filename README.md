@@ -15,13 +15,30 @@ Repository: https://github.com/Chanchairkorn-bit/BJT-DC-Bias-Web-App
 ## What it does
 
 - Tabs select the bias topology; the form and schematic change to match.
-- Resistors are entered in **kΩ** and converted to Ω before calculating.
+- **Selectable units** on every topology: resistance input in Ω / kΩ / MΩ,
+  output voltage in V / mV / µV, output current in A / mA / µA.
 - The Python backend (`dc_bias.py`) computes the DC operating point.
-- Results are rendered in the browser with units.
+- Results are rendered in the browser with the selected units.
 - Invalid inputs (`R ≤ 0`, `β ≤ 0`, `VCC ≤ 0`, non-numeric) show a clear
   error instead of crashing.
 - If the operating point leaves the forward-active region, a warning is
   shown and the result is not presented as trustworthy.
+
+## Unit selection
+
+A unit bar above the input fields sets the units for the whole page. The
+choices are kept when you switch bias tabs or recalculate.
+
+| Quantity | Options | Default |
+|----------|---------|---------|
+| Resistance (R1, R2, RC, RE, RB) | Ω, kΩ, MΩ | kΩ |
+| Voltage (VB, VE, VC, VCE, VTH) | V, mV, µV | V |
+| Current (IC, IE, IB) | A, mA, µA | mA |
+
+Internally everything is still computed in SI units (V, Ω, A); the
+selection only changes what you type and what is displayed. For example,
+`R1 = 100 kΩ`, `R1 = 100000 Ω` and `R1 = 0.1 MΩ` all describe the same
+circuit.
 
 ## Project structure
 

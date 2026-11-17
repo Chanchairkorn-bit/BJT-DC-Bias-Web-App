@@ -40,11 +40,39 @@
         </div>
         <form method="post" action="{{ url_for('index') }}">
           <input type="hidden" name="bias_type" value="{{ bias_key }}">
+
+          <div class="unit-bar">
+            <label class="unit-pick">
+              <span>ตัวต้านทาน</span>
+              <select name="unit_r">
+                {% for key, u in resistance_units.items() %}
+                <option value="{{ key }}"{% if key == unit_r %} selected{% endif %}>{{ u.symbol }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label class="unit-pick">
+              <span>กระแส</span>
+              <select name="unit_i">
+                {% for key, u in current_units.items() %}
+                <option value="{{ key }}"{% if key == unit_i %} selected{% endif %}>{{ u.symbol }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label class="unit-pick">
+              <span>แรงดัน</span>
+              <select name="unit_v">
+                {% for key, u in voltage_units.items() %}
+                <option value="{{ key }}"{% if key == unit_v %} selected{% endif %}>{{ u.symbol }}</option>
+                {% endfor %}
+              </select>
+            </label>
+          </div>
+
           <div class="grid">
-            {% for name, label, unit in spec.fields %}
-            <label class="field{% if loop.last and (spec.fields|length) is odd %} field-wide{% endif %}">
-              <span class="field-label">{{ label }} <em>{{ unit }}</em></span>
-              <input type="number" step="any" name="{{ name }}" value="{{ form[name] }}" required>
+            {% for field in form_fields %}
+            <label class="field{% if loop.last and (form_fields|length) is odd %} field-wide{% endif %}">
+              <span class="field-label">{{ field.label }} <em>{{ field.unit }}</em></span>
+              <input type="number" step="any" name="{{ field.name }}" value="{{ form[field.name] }}" required>
             </label>
             {% endfor %}
           </div>
@@ -85,23 +113,23 @@
       <div class="stats">
         <div class="stat">
           <span class="stat-label">VB</span>
-          <span class="stat-value">{{ display.vb }}<small>V</small></span>
+          <span class="stat-value">{{ display.vb }}<small>{{ display.vunit }}</small></span>
         </div>
         <div class="stat">
           <span class="stat-label">VE</span>
-          <span class="stat-value">{{ display.ve }}<small>V</small></span>
+          <span class="stat-value">{{ display.ve }}<small>{{ display.vunit }}</small></span>
         </div>
         <div class="stat">
           <span class="stat-label">VC</span>
-          <span class="stat-value">{{ display.vc }}<small>V</small></span>
+          <span class="stat-value">{{ display.vc }}<small>{{ display.vunit }}</small></span>
         </div>
         <div class="stat stat-emphasis">
           <span class="stat-label">VCE</span>
-          <span class="stat-value">{{ display.vce }}<small>V</small></span>
+          <span class="stat-value">{{ display.vce }}<small>{{ display.vunit }}</small></span>
         </div>
         <div class="stat stat-emphasis">
           <span class="stat-label">IC</span>
-          <span class="stat-value">{{ display.ic_ma }}<small>mA</small></span>
+          <span class="stat-value">{{ display.ic }}<small>{{ display.iunit }}</small></span>
         </div>
       </div>
 
@@ -110,14 +138,14 @@
           <tr><th>Additional quantities</th><th>Value</th><th>Unit</th></tr>
         </thead>
         <tbody>
-          <tr><td>IE</td><td>{{ display.ie_ma }}</td><td>mA</td></tr>
-          <tr><td>IB</td><td>{{ display.ib_ua }}</td><td>µA</td></tr>
+          <tr><td>IE</td><td>{{ display.ie }}</td><td>{{ display.iunit }}</td></tr>
+          <tr><td>IB</td><td>{{ display.ib }}</td><td>{{ display.iunit }}</td></tr>
           {% if display.vth is defined %}
-          <tr><td>VTH (Thevenin base)</td><td>{{ display.vth }}</td><td>V</td></tr>
-          <tr><td>RTH (Thevenin base)</td><td>{{ display.rth_kohm }}</td><td>kΩ</td></tr>
+          <tr><td>VTH (Thevenin base)</td><td>{{ display.vth }}</td><td>{{ display.vunit }}</td></tr>
+          <tr><td>RTH (Thevenin base)</td><td>{{ display.rth }}</td><td>{{ display.runit }}</td></tr>
           {% endif %}
-          {% if display.rb_kohm is defined %}
-          <tr><td>RB</td><td>{{ display.rb_kohm }}</td><td>kΩ</td></tr>
+          {% if display.rb is defined %}
+          <tr><td>RB</td><td>{{ display.rb }}</td><td>{{ display.runit }}</td></tr>
           {% endif %}
         </tbody>
       </table>
