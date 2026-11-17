@@ -3,7 +3,7 @@
 ## Purpose
 
 Flask web app that computes the BJT voltage-divider DC bias operating
-point for ENG29 2121 Lab 02.
+point for ENG29 2121 Lab 03.
 
 ## Rules
 

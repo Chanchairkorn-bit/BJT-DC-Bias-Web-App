@@ -1,4 +1,4 @@
-# BJT DC Bias Web App — ENG29 2121 Lab 02
+# BJT DC Bias Web App — ENG29 2121 Lab 03
 
 Flask web application that calculates the DC operating point of a BJT
 common-emitter amplifier for three bias topologies:
@@ -11,6 +11,11 @@ All use the forward-active approximation with a constant beta and a
 constant VBE.
 
 Repository: https://github.com/Chanchairkorn-bit/BJT-DC-Bias-Web-App
+
+Lab 03 extends the Lab 02 single-topology app: the original voltage-divider
+result is unchanged, while **Fixed Bias** and **Emitter Bias** are added
+and the result is verified in a real browser (OpenCode Browser Tools /
+Playwright MCP) against hand-calculated reference values.
 
 ## What it does
 

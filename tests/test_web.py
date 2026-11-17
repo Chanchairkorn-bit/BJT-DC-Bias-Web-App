@@ -70,6 +70,8 @@ class TestWebApp(unittest.TestCase):
     def test_get_index_shows_form(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
+        self.assertIn(b"BJT DC Bias Web App", response.data)
+        self.assertIn("Lab 03".encode("utf-8"), response.data)
         self.assertIn(b"Calculate DC Bias", response.data)
         self.assertIn(b"Circuit: Common-Emitter Amplifier", response.data)
         for field in (b'name="vcc"', b'name="r1"', b'name="beta"'):

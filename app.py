@@ -1,4 +1,4 @@
-"""Flask web application for the BJT DC Bias lab (ENG29 2121 Lab 02).
+"""Flask web application for the BJT DC Bias lab (ENG29 2121 Lab 03).
 
 Supports three bias topologies: voltage divider, fixed bias and emitter
 bias. Every resistor input has its own unit selector (ohm, kOhm, MOhm),

@@ -1,4 +1,4 @@
-# Design Note — Lab 02 BJT DC Bias Web App
+# Design Note — Lab 03 BJT DC Bias Web App
 
 ## Scope
 

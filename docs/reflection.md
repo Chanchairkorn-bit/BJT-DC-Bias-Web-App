@@ -1,4 +1,4 @@
-# Reflection — Lab 02 BJT DC Bias Web App
+# Reflection — Lab 03 BJT DC Bias Web App
 
 ## What was built
 

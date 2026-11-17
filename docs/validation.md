@@ -1,4 +1,4 @@
-# Validation — Lab 02 BJT DC Bias Web App
+# Validation — Lab 03 BJT DC Bias Web App
 
 ## Independent reference calculation
 
