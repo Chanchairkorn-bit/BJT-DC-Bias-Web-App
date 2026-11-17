@@ -45,6 +45,35 @@ Run with:
 python -m unittest discover -s tests -v
 ```
 
+## Additional topologies
+
+### Fixed bias (`VCC=12, RB=470k, RC=2.2k, β=100, VBE=0.70`)
+
+```
+IB  = (12 - 0.70) / 470000      = 24.043 µA
+IC  = 100 * IB                   = 2.404 mA
+IE  = 101 * IB                   = 2.428 mA
+VE  = 0 V                        (emitter grounded)
+VB  = 0.700 V
+VC  = 12 - IC * 2200             = 6.711 V
+VCE = VC                         = 6.711 V
+```
+
+### Emitter bias (`VCC=12, RB=470k, RC=2.2k, RE=1k, β=100, VBE=0.70`)
+
+```
+IB  = (12 - 0.70) / (470000 + 101*1000) = 19.790 µA
+IC  = 100 * IB                           = 1.979 mA
+IE  = 101 * IB                           = 1.999 mA
+VE  = IE * 1000                          = 1.999 V
+VB  = 1.999 + 0.70                       = 2.699 V
+VC  = 12 - IC * 2200                     = 7.646 V
+VCE = VC - VE                            = 5.647 V
+```
+
+All three default operating points are forward-active, so the model
+applies without warnings.
+
 ## Known limitations
 
 - Constant β and constant VBE are approximations; real devices vary with

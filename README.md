@@ -1,17 +1,22 @@
 # BJT DC Bias Web App — ENG29 2121 Lab 02
 
 Flask web application that calculates the DC operating point of a BJT
-common-emitter amplifier using **voltage-divider bias** with the
-forward-active approximation.
+common-emitter amplifier for three bias topologies:
+
+- **Voltage-divider bias** (R1/R2 at the base)
+- **Fixed bias** (RB from VCC to the base, emitter grounded)
+- **Emitter bias** (RB from VCC to the base + RE at the emitter)
+
+All use the forward-active approximation with a constant beta and a
+constant VBE.
 
 Repository: https://github.com/Chanchairkorn-bit/BJT-DC-Bias-Web-App
 
 ## What it does
 
-- Web form accepts `VCC`, `R1`, `R2`, `RC`, `RE`, `β (beta)` and `VBE`.
+- Tabs select the bias topology; the form and schematic change to match.
 - Resistors are entered in **kΩ** and converted to Ω before calculating.
-- The Python backend (`dc_bias.py`) computes `VTH`, `RTH`, `IB`, `IC`,
-  `IE`, `VB`, `VE`, `VC` and `VCE`.
+- The Python backend (`dc_bias.py`) computes the DC operating point.
 - Results are rendered in the browser with units.
 - Invalid inputs (`R ≤ 0`, `β ≤ 0`, `VCC ≤ 0`, non-numeric) show a clear
   error instead of crashing.
@@ -22,14 +27,16 @@ Repository: https://github.com/Chanchairkorn-bit/BJT-DC-Bias-Web-App
 
 ```
 BJT-DC-Bias-Web-App/
-├── app.py                 # Flask routes (HTTP layer)
-├── dc_bias.py             # pure engineering calculations
-├── templates/index.html   # Jinja form + results
-├── static/style.css       # presentation
+├── app.py                    # Flask routes + bias metadata (HTTP layer)
+├── dc_bias.py                # pure engineering calculations
+├── templates/
+│   ├── index.html            # Jinja form + results
+│   └── partials/             # one schematic per bias topology
+├── static/style.css          # presentation
 ├── tests/
-│   ├── test_dc_bias.py    # engineering unit tests
-│   └── test_web.py        # Flask test-client tests
-├── docs/                  # design / validation / reflection notes
+│   ├── test_dc_bias.py       # engineering unit tests
+│   └── test_web.py           # Flask test-client tests
+├── docs/                     # design / validation / reflection notes
 ├── requirements.txt
 └── README.md
 ```
@@ -69,14 +76,37 @@ python -m unittest discover -s tests -v
 
 ## Engineering model
 
-Forward-active approximation with constant `β` and constant `VBE`:
+Common practice: `IE = (β + 1)·IB`, `IC = β·IB`, and a constant `VBE`.
+All topologies assume the forward-active region.
+
+### 1. Voltage-divider bias
 
 | Quantity | Equation |
 |----------|----------|
 | VTH | VCC · R2 / (R1 + R2) |
 | RTH | R1 · R2 / (R1 + R2) |
 | IB  | (VTH − VBE) / (RTH + (β + 1) · RE) |
-| IC  | β · IB |
+| VE  | IE · RE |
+| VB  | VE + VBE |
+| VC  | VCC − IC · RC |
+| VCE | VC − VE |
+
+### 2. Fixed bias
+
+| Quantity | Equation |
+|----------|----------|
+| IB  | (VCC − VBE) / RB |
+| IE  | (β + 1) · IB |
+| VB  | VBE |
+| VE  | 0 (emitter grounded) |
+| VC  | VCC − IC · RC |
+| VCE | VC |
+
+### 3. Emitter bias
+
+| Quantity | Equation |
+|----------|----------|
+| IB  | (VCC − VBE) / (RB + (β + 1) · RE) |
 | IE  | (β + 1) · IB |
 | VE  | IE · RE |
 | VB  | VE + VBE |
@@ -87,12 +117,12 @@ This is **not** a SPICE/ngspice solver. Outside the forward-active
 region (cutoff when `VTH ≤ VBE`, or saturation when `VCE` approaches the
 saturation voltage) the app shows a warning.
 
-## Reference example
+## Reference examples
+
+### Voltage-divider bias (default)
 
 Inputs: `VCC = 12 V`, `R1 = 100 kΩ`, `R2 = 22 kΩ`, `RC = 2.2 kΩ`,
 `RE = 1 kΩ`, `β = 100`, `VBE = 0.70 V`.
-
-Expected result (forward-active):
 
 | Quantity | Value |
 |----------|-------|
@@ -105,6 +135,36 @@ Expected result (forward-active):
 | VE  | 1.242 V |
 | VC  | 9.294 V |
 | VCE | 8.052 V |
+
+### Fixed bias (default)
+
+Inputs: `VCC = 12 V`, `RB = 470 kΩ`, `RC = 2.2 kΩ`, `β = 100`,
+`VBE = 0.70 V`.
+
+| Quantity | Value |
+|----------|-------|
+| IB  | 24.043 µA |
+| IC  | 2.404 mA |
+| IE  | 2.428 mA |
+| VB  | 0.700 V |
+| VE  | 0.000 V |
+| VC  | 6.711 V |
+| VCE | 6.711 V |
+
+### Emitter bias (default)
+
+Inputs: `VCC = 12 V`, `RB = 470 kΩ`, `RC = 2.2 kΩ`, `RE = 1 kΩ`,
+`β = 100`, `VBE = 0.70 V`.
+
+| Quantity | Value |
+|----------|-------|
+| IB  | 19.790 µA |
+| IC  | 1.979 mA |
+| IE  | 1.999 mA |
+| VB  | 2.699 V |
+| VE  | 1.999 V |
+| VC  | 7.646 V |
+| VCE | 5.647 V |
 
 ## Notes
 

@@ -99,6 +99,39 @@ body {
   font-size: 14.5px;
 }
 
+/* ---------- Bias type tabs ---------- */
+.bias-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 6px;
+  margin-bottom: 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.bias-tab {
+  flex: 1 1 140px;
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--blue);
+  transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+
+.bias-tab:hover { background: #f0f6fb; }
+
+.bias-tab.is-active {
+  background: linear-gradient(180deg, #0d8d84, var(--teal));
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(12, 128, 120, .25);
+}
+
 /* ---------- Cards & layout ---------- */
 .layout {
   display: grid;

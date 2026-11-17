@@ -1,0 +1,50 @@
+<figure class="schematic">
+  <svg viewBox="0 0 460 400" role="img" aria-labelledby="sch-title sch-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="sch-title">Common-emitter amplifier with fixed bias</title>
+    <desc id="sch-desc">VCC feeds RB and RC. RB connects VCC to the base of NPN transistor Q1. RC connects to the collector and the emitter is grounded directly.</desc>
+
+    <circle cx="307" cy="210" r="32" fill="#dceefb" stroke="#1d638b" stroke-width="2.4" />
+
+    <g fill="none" stroke="#1d638b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M180 64 H320" />
+      <path d="M180 64 V90" />
+      <path d="M320 64 V90" />
+
+      <polyline points="180,90 170,96 190,104 170,112 190,120 170,128 190,136 180,142" />
+      <path d="M180 142 V210" />
+      <path d="M180 210 H300" />
+
+      <polyline points="320,90 310,96 330,104 310,112 330,120 310,128 330,136 320,142" />
+      <path d="M320 142 V188" />
+
+      <path d="M320 232 V280" />
+      <path d="M305 280 H335" />
+      <path d="M311 286 H329" />
+      <path d="M316 292 H324" />
+
+      <path d="M300 202 L320 188" />
+      <path d="M300 218 L320 232" />
+      <path d="M300 196 V224" stroke-width="3.4" />
+    </g>
+
+    <polygon points="320,232 309.5,229.6 314.1,223.0" fill="#1d638b" />
+
+    <circle cx="320" cy="64" r="4.5" fill="#103658" />
+    <circle cx="180" cy="210" r="4.5" fill="#103658" />
+
+    <g font-family="Tahoma, 'Noto Sans Thai', sans-serif">
+      <text x="336" y="60" font-size="15" font-weight="700" fill="#103658">VCC = {{ form.vcc }} V</text>
+
+      <text x="158" y="112" text-anchor="end" font-size="14" font-weight="700" fill="#17344b">RB</text>
+      <text x="158" y="131" text-anchor="end" font-size="13" fill="#546d83">{{ form.rb }} kΩ</text>
+
+      <text x="348" y="112" font-size="14" font-weight="700" fill="#17344b">RC</text>
+      <text x="348" y="131" font-size="13" fill="#546d83">{{ form.rc }} kΩ</text>
+
+      <text x="352" y="200" font-size="14" font-weight="700" fill="#17344b">Q1</text>
+      <text x="352" y="218" font-size="13" fill="#546d83">NPN</text>
+      <text x="352" y="236" font-size="13" fill="#546d83">(β = {{ form.beta }})</text>
+    </g>
+  </svg>
+  <figcaption>Fixed bias · emitter ต่อลงกราวด์โดยตรง</figcaption>
+</figure>
