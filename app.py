@@ -14,6 +14,7 @@ from __future__ import annotations
 from flask import Flask, render_template, request
 
 from dc_bias import calculate_by_type
+from spice_engine import CircuitParams, run_simulation
 
 app = Flask(__name__)
 
@@ -71,12 +72,35 @@ BIAS_TYPES = {
             "beta": "100", "vbe": "0.70",
         },
     },
+    "ce-amplifier": {
+        "label": "CE SPICE Simulator (Lab 04)",
+        "title": "Common-Emitter Amplifier SPICE Simulator",
+        "schematic": "partials/schematic_ce_spice.html",
+        "fields": [
+            ("vcc", "VCC", "V"),
+            ("r1", "R1", "kΩ"),
+            ("r2", "R2", "kΩ"),
+            ("rc", "RC", "kΩ"),
+            ("re", "RE", "kΩ"),
+            ("rl", "RL", "kΩ"),
+            ("cin", "Cin", "µF"),
+            ("cout", "Cout", "µF"),
+            ("beta", "β", "beta"),
+            ("amplitude", "Vin (Peak)", "mV"),
+            ("frequency", "Frequency", "Hz"),
+        ],
+        "defaults": {
+            "vcc": "12", "r1": "100", "r2": "22", "rc": "2.2", "re": "1",
+            "rl": "10", "cin": "10", "cout": "10", "beta": "100",
+            "amplitude": "10", "frequency": "1000",
+        },
+    },
 }
 
 DEFAULT_BIAS = "voltage-divider"
 
 # Fields entered as resistance; each one has its own unit selector.
-RESISTOR_FIELDS = {"r1", "r2", "rc", "re", "rb"}
+RESISTOR_FIELDS = {"r1", "r2", "rc", "re", "rb", "rl"}
 
 RESISTANCE_UNITS = {
     "ohm": {"symbol": "Ω", "factor": 1.0, "decimals": 3},
@@ -197,6 +221,8 @@ def index():
     result = None
     display = None
     errors = []
+    analysis_mode = request.values.get("analysis_mode", "dc")
+    spice_result = None
 
     # Resolve the unit of every input field.
     form_fields = []
@@ -241,17 +267,70 @@ def index():
         form = {name: request.form.get(name, "") for name, _l, _u in spec["fields"]}
         try:
             values = parse_form(bias_key, request.form, resistance_factors, labels)
-            result = calculate_by_type(bias_key, **values)
+            if bias_key == "ce-amplifier":
+                cp = CircuitParams(
+                    vcc=values["vcc"],
+                    r1=values["r1"],
+                    r2=values["r2"],
+                    rc=values["rc"],
+                    re=values["re"],
+                    rl=values.get("rl", 10_000.0),
+                    cin=values.get("cin", 10.0) * 1e-6,
+                    cout=values.get("cout", 10.0) * 1e-6,
+                    beta=values.get("beta", 100.0),
+                    amplitude=values.get("amplitude", 10.0) * 1e-3,
+                    frequency=values.get("frequency", 1000.0),
+                )
+                spice_result = run_simulation(cp, mode=analysis_mode)
+                if spice_result.get("status") == "error":
+                    errors.extend(spice_result.get("errors", ["Simulation failed"]))
+                else:
+                    if "dc" in spice_result:
+                        dc_raw = spice_result["dc"]
+                        vu = VOLTAGE_UNITS[unit_v]
+                        iu = CURRENT_UNITS[unit_i]
+                        spice_result["display"] = {
+                            "vb": _fmt(dc_raw["vb"] * vu["factor"], vu),
+                            "ve": _fmt(dc_raw["ve"] * vu["factor"], vu),
+                            "vc": _fmt(dc_raw["vc"] * vu["factor"], vu),
+                            "vce": _fmt(dc_raw["vce"] * vu["factor"], vu),
+                            "ic": _fmt(dc_raw["ic"] * iu["factor"], iu),
+                            "ib": _fmt(dc_raw["ib"] * iu["factor"], iu),
+                            "vbe": _fmt(dc_raw["vbe"] * vu["factor"], vu),
+                            "vunit": vu["symbol"],
+                            "iunit": iu["symbol"],
+                        }
+                    try:
+                        result = calculate_by_type(
+                            "voltage-divider",
+                            vcc=values["vcc"],
+                            r1=values["r1"],
+                            r2=values["r2"],
+                            rc=values["rc"],
+                            re=values["re"],
+                            beta=values["beta"],
+                            vbe=0.70,
+                        )
+                        display = _display(
+                            result,
+                            unit_i,
+                            unit_v,
+                            rth_unit=resistor_units.get("r1", default_unit_r),
+                            rb_unit=resistor_units.get("rb", default_unit_r),
+                        )
+                    except Exception:
+                        pass
+            else:
+                result = calculate_by_type(bias_key, **values)
+                display = _display(
+                    result,
+                    unit_i,
+                    unit_v,
+                    rth_unit=resistor_units.get("r1", default_unit_r),
+                    rb_unit=resistor_units.get("rb", default_unit_r),
+                )
         except ValueError as exc:
             errors.append(str(exc))
-        else:
-            display = _display(
-                result,
-                unit_i,
-                unit_v,
-                rth_unit=resistor_units.get("r1", default_unit_r),
-                rb_unit=resistor_units.get("rb", default_unit_r),
-            )
 
     # Schematic labels follow the unit chosen for each individual resistor.
     unit_r_symbols = {
@@ -265,6 +344,8 @@ def index():
         form_fields=form_fields,
         result=result,
         display=display,
+        spice_result=spice_result,
+        analysis_mode=analysis_mode,
         errors=errors,
         bias_types={key: item["label"] for key, item in BIAS_TYPES.items()},
         bias_key=bias_key,

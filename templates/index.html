@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ENG29 2121 · Lab 03 — BJT DC Bias Web App</title>
+  <title>ENG29 2121 · Lab 03 &amp; 04 — BJT DC Bias Web App &amp; CE Simulator</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -11,13 +11,14 @@
     <header class="hero">
       <div class="hero-badges">
         <span class="badge">ENG29 2121 · Lab 03</span>
+        <span class="badge badge-teal">Lab 04 · ngspice</span>
         <span class="badge badge-ghost">Flask · Python</span>
       </div>
       <h1>BJT DC Bias Web App</h1>
-      <p class="subtitle">Voltage Divider · Fixed Bias · Emitter Bias — ตรวจผลผ่านเบราว์เซอร์</p>
+      <p class="subtitle">Voltage Divider · Fixed Bias · Emitter Bias · CE SPICE Simulator (DC · AC · Transient)</p>
     </header>
 
-    <nav class="bias-tabs" aria-label="เลือกชนิดไบอัส">
+    <nav class="bias-tabs" aria-label="เลือกชนิดวงจร / โหมดจำลอง">
       {% for key, label in bias_types.items() %}
       <a class="bias-tab{% if key == bias_key %} is-active{% endif %}"
          href="{{ url_for('index', bias=key) }}">{{ label }}</a>
@@ -83,12 +84,38 @@
             </label>
             {% endfor %}
           </div>
+
+          {% if bias_key == 'ce-amplifier' %}
+          <div class="analysis-box">
+            <span class="analysis-title">Analysis Mode (SPICE Directive):</span>
+            <div class="analysis-radios">
+              <label class="radio-label">
+                <input type="radio" name="analysis_mode" value="dc"{% if analysis_mode == 'dc' %} checked{% endif %}>
+                <span><strong>DC (.op)</strong></span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="analysis_mode" value="ac"{% if analysis_mode == 'ac' %} checked{% endif %}>
+                <span><strong>AC (.ac)</strong></span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="analysis_mode" value="tran"{% if analysis_mode == 'tran' %} checked{% endif %}>
+                <span><strong>Transient (.tran)</strong></span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="analysis_mode" value="all"{% if analysis_mode == 'all' %} checked{% endif %}>
+                <span><strong>All Modes</strong></span>
+              </label>
+            </div>
+          </div>
+          <button class="btn-primary btn-spice" type="submit">Run SPICE Simulation</button>
+          {% else %}
           <button class="btn-primary" type="submit">Calculate DC Bias</button>
+          {% endif %}
         </form>
 
         {% if errors %}
         <div class="alert alert-error" role="alert">
-          <strong>ไม่สามารถคำนวณได้</strong>
+          <strong>ไม่สามารถจำลอง/คำนวณได้</strong>
           <ul>
             {% for error in errors %}
             <li>{{ error }}</li>
@@ -99,10 +126,119 @@
       </section>
     </div>
 
-    {% if result %}
+    {# ----------------- SPICE RESULTS (Lab 04) ----------------- #}
+    {% if spice_result and spice_result.status == 'success' %}
+    <section class="card card-results card-spice">
+      <div class="card-head">
+        <h2>SPICE Simulation Results</h2>
+        <div class="badges-row">
+          <span class="chip chip-engine">Engine: {{ spice_result.engine }}</span>
+          <span class="chip chip-model">Model: {{ spice_result.bjt_model }}</span>
+          <span class="chip chip-status">Status: PASS (Real SPICE Run)</span>
+        </div>
+      </div>
+
+      {# 1. DC OPERATING POINT (.op) #}
+      {% if spice_result.dc %}
+      <div class="section-block">
+        <h3 class="block-title">1. DC Operating Point (.op)</h3>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">VB</span>
+            <span class="stat-value">{{ spice_result.display.vb }}<small>{{ spice_result.display.vunit }}</small></span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">VE</span>
+            <span class="stat-value">{{ spice_result.display.ve }}<small>{{ spice_result.display.vunit }}</small></span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">VC</span>
+            <span class="stat-value">{{ spice_result.display.vc }}<small>{{ spice_result.display.vunit }}</small></span>
+          </div>
+          <div class="stat stat-emphasis">
+            <span class="stat-label">VCE</span>
+            <span class="stat-value">{{ spice_result.display.vce }}<small>{{ spice_result.display.vunit }}</small></span>
+          </div>
+          <div class="stat stat-emphasis">
+            <span class="stat-label">IC</span>
+            <span class="stat-value">{{ spice_result.display.ic }}<small>{{ spice_result.display.iunit }}</small></span>
+          </div>
+        </div>
+
+        {% if spice_result.analytical %}
+        <div class="provenance-box">
+          <h4>Engineering Provenance: SPICE vs. Analytical (Lab 03)</h4>
+          <table class="results comparison-table">
+            <thead>
+              <tr><th>Parameter</th><th>ngspice (.op)</th><th>Analytical (dc_bias.py)</th><th>Unit</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>VB</td><td>{{ spice_result.display.vb }}</td><td>{{ display.vb }}</td><td>{{ spice_result.display.vunit }}</td></tr>
+              <tr><td>VE</td><td>{{ spice_result.display.ve }}</td><td>{{ display.ve }}</td><td>{{ spice_result.display.vunit }}</td></tr>
+              <tr><td>VC</td><td>{{ spice_result.display.vc }}</td><td>{{ display.vc }}</td><td>{{ spice_result.display.vunit }}</td></tr>
+              <tr><td>VCE</td><td>{{ spice_result.display.vce }}</td><td>{{ display.vce }}</td><td>{{ spice_result.display.vunit }}</td></tr>
+              <tr><td>IC</td><td>{{ spice_result.display.ic }}</td><td>{{ display.ic }}</td><td>{{ spice_result.display.iunit }}</td></tr>
+              <tr><td>IB</td><td>{{ spice_result.display.ib }}</td><td>{{ display.ib }}</td><td>{{ spice_result.display.iunit }}</td></tr>
+            </tbody>
+          </table>
+          <p class="soft-hint">หมายเหตุ: ผลจาก SPICE คำนวณจากแบบจำลองฟิสิกส์ Ebers-Moll / Gummel-Poon พร้อม VBE จริง (~{{ spice_result.display.vbe }}{{ spice_result.display.vunit }}) ส่วน Analytical ใช้การประมาณ β และ VBE คงที่ (0.70 V)</p>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {# 2. AC FREQUENCY RESPONSE (.ac) #}
+      {% if spice_result.ac %}
+      <div class="section-block">
+        <h3 class="block-title">2. AC Frequency Response (.ac — Bode Plot)</h3>
+        <div class="meta-metrics">
+          <div class="metric-chip"><strong>Midband Gain (|Av|):</strong> {{ spice_result.ac.meta.midband_gain_db }} dB ({{ spice_result.ac.meta.midband_gain_linear }}x)</div>
+          <div class="metric-chip"><strong>f_L (-3dB):</strong> {{ spice_result.ac.meta.f_low }}</div>
+          <div class="metric-chip"><strong>f_H (-3dB):</strong> {{ spice_result.ac.meta.f_high }}</div>
+          <div class="metric-chip"><strong>Data Points:</strong> {{ spice_result.ac.data_points }}</div>
+        </div>
+        <div class="chart-container">
+          {{ spice_result.ac.svg | safe }}
+        </div>
+      </div>
+      {% endif %}
+
+      {# 3. TRANSIENT WAVEFORMS (.tran) #}
+      {% if spice_result.tran %}
+      <div class="section-block">
+        <h3 class="block-title">3. Transient Analysis (.tran — Time Domain)</h3>
+        <div class="meta-metrics">
+          <div class="metric-chip"><strong>Vin Peak:</strong> {{ (spice_result.tran.meta.vin_peak * 1000) | round(2) }} mV</div>
+          <div class="metric-chip"><strong>Vout Peak:</strong> {{ (spice_result.tran.meta.vout_peak * 1000) | round(2) }} mV</div>
+          <div class="metric-chip"><strong>Observed |Av|:</strong> {{ spice_result.tran.meta.observed_gain }}x</div>
+          <div class="metric-chip phase-chip">
+            <strong>Phase Inversion:</strong>
+            {% if spice_result.tran.meta.phase_inverted %}
+              <span class="tag-pass">180° Inverted (Correct for CE) ✓</span>
+            {% else %}
+              <span class="tag-warn">Not Inverted</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="chart-container">
+          {{ spice_result.tran.svg | safe }}
+        </div>
+      </div>
+      {% endif %}
+
+      {# RAW LOG COLLAPSIBLE #}
+      <details class="log-details">
+        <summary>View Raw ngspice Output &amp; Verification Log</summary>
+        <pre class="raw-log"><code>{{ spice_result.log }}</code></pre>
+      </details>
+    </section>
+    {% endif %}
+
+    {# ----------------- LAB 03 ANALYTICAL RESULTS ----------------- #}
+    {% if result and not spice_result %}
     <section class="card card-results">
       <div class="card-head">
-        <h2>DC Bias Results</h2>
+        <h2>DC Bias Results (Analytical)</h2>
         <span class="region region-{{ result.region }}">
           <span class="dot"></span>
           {% if result.region == 'forward-active' %}
@@ -171,7 +307,8 @@
     {% endif %}
 
     <footer class="foot">
-      <p>แบบจำลอง Forward-Active: β คงที่ และ VBE คงที่ · ไม่ใช่ ngspice/SPICE solver</p>
+      <p>ENG29 2121 · Computer Programming for Electrical Engineers — Lab 03 &amp; 04 BJT CE Simulator</p>
+      <p class="soft-hint">แบบจำลอง Analytical: β คงที่, VBE 0.7V | SPICE Engine: ngspice-47 (Direct Linear Solver)</p>
     </footer>
   </div>
 </body>

@@ -1,0 +1,126 @@
+<figure class="schematic">
+  <svg viewBox="0 0 520 340" role="img" aria-labelledby="sch-ce-title sch-ce-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="sch-ce-title">Common-Emitter BJT Amplifier Circuit Schematic</title>
+    <desc id="sch-ce-desc">VCC connects to R1 and RC. R1 and R2 bias Q1 base. RC connects to collector and RE connects emitter to ground. Cin couples Vin to base, Cout couples collector to RL.</desc>
+
+    <!-- Transistor circle -->
+    <circle cx="310" cy="180" r="32" fill="#dceefb" stroke="#1d638b" stroke-width="2.4" />
+
+    <!-- Wiring and components -->
+    <g fill="none" stroke="#1d638b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <!-- VCC rail -->
+      <path d="M160 40 H330" />
+      <path d="M160 40 V65" />
+      <path d="M330 40 V65" />
+
+      <!-- R1 resistor -->
+      <polyline points="160,65 152,70 168,76 152,82 168,88 152,94 168,100 160,105" />
+      <path d="M160 105 V180" />
+
+      <!-- R2 resistor -->
+      <path d="M160 180 V215" />
+      <polyline points="160,215 152,220 168,226 152,232 168,238 152,244 168,250 160,255" />
+      <path d="M160 255 V295" />
+      <!-- Ground at R2 -->
+      <path d="M148 295 H172" />
+      <path d="M153 300 H167" />
+      <path d="M157 305 H163" />
+
+      <!-- Base connection -->
+      <path d="M160 180 H303" />
+
+      <!-- Input source and Cin -->
+      <path d="M50 180 H90" />
+      <!-- Cin capacitor plates -->
+      <path d="M90 168 V192" stroke-width="3" />
+      <path d="M98 168 V192" stroke-width="3" />
+      <path d="M98 180 H160" />
+
+      <!-- AC Source circle -->
+      <circle cx="50" cy="210" r="14" fill="#ffffff" stroke="#1d638b" stroke-width="2.2" />
+      <path d="M50 180 V196" />
+      <path d="M50 224 V295" />
+      <!-- Ground at Vin -->
+      <path d="M38 295 H62" />
+      <path d="M43 300 H57" />
+      <path d="M47 305 H53" />
+      <!-- Sine symbol inside Vin -->
+      <path d="M42 210 Q46 204 50 210 T58 210" stroke-width="1.8" />
+
+      <!-- RC resistor -->
+      <polyline points="330,65 322,70 338,76 322,82 338,88 322,94 338,100 330,105" />
+      <path d="M330 105 V158" />
+
+      <!-- Q1 internal connections -->
+      <path d="M303 172 L324 158" />
+      <path d="M303 188 L324 202" />
+      <path d="M303 166 V194" stroke-width="3.4" />
+
+      <!-- RE resistor -->
+      <path d="M324 202 V220" />
+      <polyline points="324,220 316,225 332,231 316,237 332,243 316,249 332,255 324,260" />
+      <path d="M324 260 V295" />
+      <!-- Ground at RE -->
+      <path d="M312 295 H336" />
+      <path d="M317 300 H331" />
+      <path d="M321 305 H327" />
+
+      <!-- Cout capacitor and RL -->
+      <path d="M330 158 H380" />
+      <!-- Cout capacitor plates -->
+      <path d="M380 146 V170" stroke-width="3" />
+      <path d="M388 146 V170" stroke-width="3" />
+      <path d="M388 158 H445 V215" />
+
+      <!-- RL load resistor -->
+      <polyline points="445,215 437,220 453,226 437,232 453,238 437,244 453,250 445,255" />
+      <path d="M445 255 V295" />
+      <!-- Ground at RL -->
+      <path d="M433 295 H457" />
+      <path d="M438 300 H452" />
+      <path d="M442 305 H448" />
+
+      <!-- Vout terminal -->
+      <path d="M445 158 H475" />
+      <circle cx="478" cy="158" r="3.5" fill="#103658" />
+    </g>
+
+    <!-- Transistor emitter arrow (NPN) -->
+    <polygon points="324,202 313.5,199.6 318.1,193.0" fill="#1d638b" />
+
+    <!-- Junction dots -->
+    <circle cx="160" cy="180" r="4" fill="#07766e" />
+    <circle cx="330" cy="158" r="4" fill="#07766e" />
+    <circle cx="160" cy="40" r="3.5" fill="#103658" />
+    <circle cx="330" cy="40" r="3.5" fill="#103658" />
+
+    <!-- Labels -->
+    <g font-family="Tahoma, 'Noto Sans Thai', sans-serif">
+      <text x="345" y="38" font-size="14" font-weight="700" fill="#103658">+VCC = {{ form.vcc }} V</text>
+
+      <text x="142" y="85" text-anchor="end" font-size="13" font-weight="700" fill="#17344b">R1</text>
+      <text x="142" y="100" text-anchor="end" font-size="11" fill="#546d83">{{ form.r1 }} {{ unit_r1_symbol }}</text>
+
+      <text x="142" y="235" text-anchor="end" font-size="13" font-weight="700" fill="#17344b">R2</text>
+      <text x="142" y="250" text-anchor="end" font-size="11" fill="#546d83">{{ form.r2 }} {{ unit_r2_symbol }}</text>
+
+      <text x="348" y="85" font-size="13" font-weight="700" fill="#17344b">RC</text>
+      <text x="348" y="100" font-size="11" fill="#546d83">{{ form.rc }} {{ unit_rc_symbol }}</text>
+
+      <text x="345" y="240" font-size="13" font-weight="700" fill="#17344b">RE</text>
+      <text x="345" y="255" font-size="11" fill="#546d83">{{ form.re }} {{ unit_re_symbol }}</text>
+
+      <text x="465" y="235" font-size="13" font-weight="700" fill="#17344b">RL</text>
+      <text x="465" y="250" font-size="11" fill="#546d83">{{ form.rl }} {{ unit_rl_symbol }}</text>
+
+      <text x="94" y="155" text-anchor="middle" font-size="11" font-weight="700" fill="#17344b">Cin {{ form.cin }}µF</text>
+      <text x="384" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#17344b">Cout {{ form.cout }}µF</text>
+
+      <text x="28" y="215" text-anchor="end" font-size="12" font-weight="700" fill="#0d9488">Vin</text>
+      <text x="28" y="230" text-anchor="end" font-size="10" fill="#546d83">{{ form.amplitude }}mV · {{ form.frequency }}Hz</text>
+
+      <text x="485" y="153" font-size="13" font-weight="700" fill="#ea580c">Vout</text>
+      <text x="310" y="215" text-anchor="middle" font-size="11" font-weight="700" fill="#1d638b">Q1 (NPN)</text>
+    </g>
+  </svg>
+</figure>
